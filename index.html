@@ -7,7 +7,6 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
   <style>
-    /* DESIGN OU A KI RETE 100% MENM JAN */
     .page { display: none; opacity: 0; transition: all 0.4s ease-in-out; }
     .active { display: flex; opacity: 1; }
     .btn-pro { 
@@ -80,7 +79,7 @@
         <input type="tel" id="whatsappInscription" class="input-pro" placeholder="WhatsApp (+509)">
         <input type="password" id="passInscription" class="input-pro" placeholder="Mot de passe">
         <button id="btn-reg" onclick="verifierEtEnvoyerCode()" class="btn-pro bg-slate-900">
-           <span id="txt-reg">Suivant</span>
+           <span>Suivant</span>
            <div id="load-reg" class="spinner hidden"></div>
         </button>
         <div id="msg-reg" class="text-center text-xs font-bold p-4 rounded-2xl hidden"></div>
@@ -93,29 +92,20 @@
   </div>
 
   <script>
-    const SCRIPT_URL = "hconst SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwmGDyu-UlrtrhQHc2geDE6gKVTz7BBR72TnWZHPQuVJinafh-rK6NSjmDmuJIJvBURCQ/exec";
+    // NOUVO LYEN OU A KI METE NAN KÒD LA
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycby9zpKi2K5hT77LxrmmwGwxGUjZwjio9_G1oYdep3fNsjc_xzoxY6KnLz3i7ikcv7JuLw/exec";
     
     let currentStep = 1;
 
-    // Fonksyon pou kominike ak Google Apps Script
-    async function releServe(done) {
-      try {
-        const response = await fetch(SCRIPT_URL, {
-          method: 'POST',
-          body: JSON.stringify(done)
-        });
-        
-        // Piske Google Scripts konn gen pwoblèm CORS, nou tcheke si nou jwenn repons
-        const text = await response.text();
-        try {
-          return JSON.parse(text);
-        } catch(e) {
-          // Si nou pa ka parse JSON lan, nou sipoze se mode "no-cors" la ki bloke l
-          // Men done yo pati kanmenm
-          return { success: true, message: "Requête envoyée" };
-        }
-      } catch (e) {
-        return { success: false, message: "Erreur de connexion" };
+    // Splash Screen Timer
+    window.onload = () => { setTimeout(() => { showPage('onboarding'); }, 3000); };
+
+    function showPage(pageId) {
+      document.querySelectorAll('.page').forEach(p => { p.classList.remove('active'); p.style.display = 'none'; });
+      const target = document.getElementById(pageId);
+      if(target) {
+        target.style.display = 'flex';
+        setTimeout(() => target.classList.add('active'), 10);
       }
     }
 
@@ -128,14 +118,19 @@
       } else { showPage('connexion'); }
     }
 
-    function showPage(pageId) {
-      document.querySelectorAll('.page').forEach(p => { p.classList.remove('active'); p.style.display = 'none'; });
-      const target = document.getElementById(pageId);
-      target.style.display = 'flex';
-      setTimeout(() => target.classList.add('active'), 10);
+    async function fetchData(data) {
+      try {
+        const response = await fetch(SCRIPT_URL, {
+          method: 'POST',
+          mode: 'no-cors', // Enpòtan pou Google Script
+          body: JSON.stringify(data)
+        });
+        // Paske nou nan 'no-cors', nou sipoze sa mache si done yo pati
+        return { success: true, message: "Requête envoyée avec succès" };
+      } catch (e) {
+        return { success: false, message: "Erreur de connexion" };
+      }
     }
-
-    window.onload = () => { setTimeout(() => { showPage('onboarding'); }, 3000); };
 
     function showStatus(elementId, message, isError) {
       const el = document.getElementById(elementId);
@@ -145,40 +140,27 @@
     }
 
     async function connexion() {
-      const email = document.getElementById('emailConnexion').value.trim();
+      const email = document.getElementById('emailConnexion').value;
       const pass = document.getElementById('passConnexion').value;
       if(!email || !pass) return;
-      
       document.getElementById('load-login').classList.remove('hidden');
-      const res = await releServe({ action: "connexion", email, pass });
-      
-      if(res.success) {
-        showStatus('msg-login', res.message || "Connexion réussie !", false);
-        // Ou ka mete yon redireksyon isit la
-      } else {
-        showStatus('msg-login', res.message || "Email ou mot de passe incorrect.", true);
-      }
-      document.getElementById('load-login').classList.add('hidden');
+      const res = await fetchData({ action: "connexion", email, pass });
+      showStatus('msg-login', "Tentative de connexion...", false);
+      setTimeout(() => document.getElementById('load-login').classList.add('hidden'), 2000);
     }
 
     async function verifierEtEnvoyerCode() {
-      const email = document.getElementById('emailInscription').value.trim();
+      const email = document.getElementById('emailInscription').value;
       if(!email) return;
-      
       document.getElementById('load-reg').classList.remove('hidden');
-      const res = await releServe({ action: "verifierEmail", email });
-      
-      if(res.success) {
-        showStatus('msg-reg', "Code envoyé ! Vérifiez votre email.", false);
-        document.getElementById('codeSection').classList.remove('hidden');
-      } else {
-        showStatus('msg-reg', res.message || "Erreur lors de l'envoi du code.", true);
-      }
+      await fetchData({ action: "verifierEmail", email });
+      showStatus('msg-reg', "Si l'email est valide, un code a été envoyé.", false);
+      document.getElementById('codeSection').classList.remove('hidden');
       document.getElementById('load-reg').classList.add('hidden');
     }
 
     async function inscription() {
-      const done = {
+      const data = {
         action: "inscription",
         nom: document.getElementById('nomInscription').value,
         email: document.getElementById('emailInscription').value,
@@ -186,14 +168,9 @@
         pass: document.getElementById('passInscription').value,
         code: document.getElementById('codeVerification').value
       };
-      
-      const res = await releServe(done);
-      if(res.success) {
-        showStatus('msg-reg', "Compte créé ! Vous pouvez vous connecter.", false);
-        setTimeout(() => showPage('connexion'), 3000);
-      } else {
-        showStatus('msg-reg', res.message || "Erreur lors de l'inscription.", true);
-      }
+      await fetchData(data);
+      showStatus('msg-reg', "Inscription envoyée !", false);
+      setTimeout(() => showPage('connexion'), 2000);
     }
   </script>
 </body>
